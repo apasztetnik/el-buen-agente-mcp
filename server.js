@@ -481,25 +481,28 @@ app.set("trust proxy", 1);
 app.use(express.json({ limit: "256kb" }));
 
 // 60 req/min por IP + techo global de 600 req/min: acota CPU y costo ante spam
-app.use(
-  rateLimit({
-    windowMs: 60_000,
-    limit: 60,
-    standardHeaders: "draft-8",
-    legacyHeaders: false,
-    message: { jsonrpc: "2.0", error: { code: -32000, message: "Rate limit exceeded. Try again in a minute." }, id: null },
-  })
-);
-app.use(
-  rateLimit({
-    windowMs: 60_000,
-    limit: 600,
-    keyGenerator: () => "global",
-    standardHeaders: false,
-    legacyHeaders: false,
-    message: { jsonrpc: "2.0", error: { code: -32000, message: "Server busy. Try again in a minute." }, id: null },
-  })
-);
+// DISABLE_RATE_LIMIT=1 lo apaga para la suite de tests (local/CI)
+if (process.env.DISABLE_RATE_LIMIT !== "1") {
+  app.use(
+    rateLimit({
+      windowMs: 60_000,
+      limit: 60,
+      standardHeaders: "draft-8",
+      legacyHeaders: false,
+      message: { jsonrpc: "2.0", error: { code: -32000, message: "Rate limit exceeded. Try again in a minute." }, id: null },
+    })
+  );
+  app.use(
+    rateLimit({
+      windowMs: 60_000,
+      limit: 600,
+      keyGenerator: () => "global",
+      standardHeaders: false,
+      legacyHeaders: false,
+      message: { jsonrpc: "2.0", error: { code: -32000, message: "Server busy. Try again in a minute." }, id: null },
+    })
+  );
+}
 
 app.post("/mcp", async (req, res) => {
   const server = buildServer();
