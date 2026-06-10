@@ -6,6 +6,14 @@ Las versiones se publican al pushear un tag `vX.Y.Z`: el CI corre los tests, Rai
 
 ## [Sin publicar]
 
+## [2.6.0] - 2026-06-10
+
+### Agregado
+- Tool `validar_veredicto`: declara un `outputSchema` real y devuelve `structuredContent` validado por el SDK (conteos + veredicto normalizado, apto solo si faltas === 0). Da el contrato del checklist a nivel protocolo MCP, sin depender de parsear texto. 18 tools en total.
+
+### Cambiado
+- El bloque máquina de `checklist_nacimiento` ahora apunta a `validar_veredicto` para el contrato validado.
+
 ## [2.5.0] - 2026-06-10
 
 ### Agregado
@@ -41,7 +49,8 @@ Las versiones se publican al pushear un tag `vX.Y.Z`: el CI corre los tests, Rai
 - Repositorio público en GitHub con deploy automático a Railway por push a `main`.
 - Rate limiting (60 req/min por IP, 600 global) y cap de recursos del servicio.
 
-[Sin publicar]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.5.0...HEAD
+[Sin publicar]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.6.0...HEAD
+[2.6.0]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.2.0...v2.3.0

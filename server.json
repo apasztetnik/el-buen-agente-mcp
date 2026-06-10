@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.apasztetnik/el-buen-agente-mcp",
-  "description": "La guía 'El Buen Agente' como 17 tools para evaluar, mejorar y construir agentes LLM. En español.",
+  "description": "La guía 'El Buen Agente' como 18 tools para evaluar, mejorar y construir agentes LLM. En español.",
   "repository": {
     "url": "https://github.com/apasztetnik/el-buen-agente-mcp",
     "source": "github"

@@ -4,7 +4,7 @@
 
 > 🇪🇸 [Versión en español](README.md)
 
-A public MCP server that turns **"El Buen Agente"** (a canonical guide with criteria for building robust LLM agents) into **17 actionable tools**: instead of reading a guide, you pass it your agent's definition and it returns structured evaluations, a formal contract, a 19-point birth checklist as a merge gate, and the final agent definition ready to use.
+A public MCP server that turns **"El Buen Agente"** (a canonical guide with criteria for building robust LLM agents) into **18 actionable tools**: instead of reading a guide, you pass it your agent's definition and it returns structured evaluations, a formal contract, a 19-point birth checklist as a merge gate, and the final agent definition ready to use.
 
 **Public endpoint:** `https://el-buen-agente-mcp-production.up.railway.app/mcp`
 
@@ -52,6 +52,7 @@ checklist_nacimiento (diagnosis) → tools for the failing sections → re-run c
 | `evaluar_sistema` | §9 | Fit within the existing agent ecosystem |
 | `plan_exposicion_mcp` | §10 | What to expose as tool/resource/prompt |
 | `checklist_nacimiento` | §11 | Merge gate: 19 points, fit/unfit verdict |
+| `validar_veredicto` | - | Validates the checklist verdict with `outputSchema` (protocol-level contract for CI) |
 | `construir_agente` | - | Closes the loop: generates the final definition (markdown / SKILL.md / system prompt) |
 | `plan_de_inicio` | §12 | Rollout plan: copilot first, autonomy earned by evidence |
 | `get_el_buen_agente` | - | The full guide in Markdown |

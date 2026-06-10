@@ -95,6 +95,8 @@ const NEXT_STEP = {
     "Si el veredicto es APTO: llamá `construir_agente` para generar la definición final lista para usar. Si es NO APTO: volvé a la tool de cada sección con ❌ (§1→`revisar_rol_y_frontera`, §2→`revisar_outputs`, §3→`evaluar_autonomia`, §4→`revisar_frontera_ejecucion`, §6→`auditar_contexto`, §7→`disenar_evaluacion`, §8→`generar_contrato`), aplicá las recomendaciones y volvé a correr este checklist.",
   construir_agente:
     "Guardá el artefacto generado en el repo del agente y cerrá con `plan_de_inicio` (§12) para el plan de despliegue.",
+  validar_veredicto:
+    "Veredicto validado. Si es `apto`, seguí con `construir_agente`. Si es `no_apto`, volvé a las secciones con faltas.",
   plan_de_inicio: "Fin del flujo. Desplegá como copiloto, medí contra el proceso actual y escalá autonomía por evidencia.",
 };
 
@@ -135,7 +137,7 @@ const LANGUAGE = z
 // ---------------------------------------------------------------------------
 function buildServer() {
   const server = new McpServer(
-    { name: "el-buen-agente", version: "2.5.0" },
+    { name: "el-buen-agente", version: "2.6.0" },
     { instructions: FLOW_INSTRUCTIONS }
   );
 
@@ -416,9 +418,50 @@ Evaluá los 19 puntos UNO POR UNO en una tabla: | # | Punto | Veredicto | Eviden
 ## Bloque máquina (para CI)
 Cerrá tu evaluación con un bloque de código JSON (cercado con \`\`\`json) con EXACTAMENTE esta forma:
 {"tool":"checklist_nacimiento","aptos":N,"parciales":N,"faltas":N,"veredicto":"apto","puntos":[{"n":1,"estado":"ok"},{"n":2,"estado":"parcial"},{"n":3,"estado":"falta"}]}
-Reglas del bloque: claves y valores de "estado" (ok|parcial|falta) y "veredicto" (apto|no_apto) van SIEMPRE así, sin traducir, independientemente del idioma de la evaluación. "veredicto" es "apto" solo si faltas == 0. Los 19 puntos deben estar presentes en "puntos".`,
+Reglas del bloque: claves y valores de "estado" (ok|parcial|falta) y "veredicto" (apto|no_apto) van SIEMPRE así, sin traducir, independientemente del idioma de la evaluación. "veredicto" es "apto" solo si faltas == 0. Los 19 puntos deben estar presentes en "puntos". Para un contrato validado a nivel protocolo (CI), pasá esos "puntos" a la tool validar_veredicto.`,
       language
     ))
+  );
+
+  // --- Validación del veredicto del checklist (contrato a nivel protocolo) ---
+  // Declara outputSchema real: el SDK valida structuredContent contra él. El
+  // consumidor pasa el conteo que obtuvo en checklist_nacimiento y el servidor
+  // normaliza el veredicto de forma determinística (apto sólo si faltas === 0).
+  const PUNTO = z.object({
+    n: z.number().int().min(1).max(19),
+    estado: z.enum(["ok", "parcial", "falta"]),
+  });
+  server.registerTool(
+    "validar_veredicto",
+    {
+      title: "Validar el veredicto del checklist (para CI)",
+      description:
+        "Cierra el ciclo de checklist_nacimiento con un contrato a nivel protocolo. Pasale los 19 puntos con su estado " +
+        "(ok|parcial|falta) y devuelve structuredContent validado: conteos y veredicto normalizado (apto solo si faltas === 0). " +
+        "Pensada para consumo programático / gates de CI: no depende de parsear texto.",
+      inputSchema: {
+        puntos: z.array(PUNTO).length(19).describe("Los 19 puntos del checklist con su estado evaluado."),
+      },
+      outputSchema: {
+        aptos: z.number().int(),
+        parciales: z.number().int(),
+        faltas: z.number().int(),
+        veredicto: z.enum(["apto", "no_apto"]),
+        completo: z.boolean().describe("true si están los 19 puntos sin números repetidos."),
+      },
+    },
+    async ({ puntos }) => {
+      const aptos = puntos.filter((p) => p.estado === "ok").length;
+      const parciales = puntos.filter((p) => p.estado === "parcial").length;
+      const faltas = puntos.filter((p) => p.estado === "falta").length;
+      const completo = new Set(puntos.map((p) => p.n)).size === 19;
+      const veredicto = faltas === 0 && completo ? "apto" : "no_apto";
+      const structured = { aptos, parciales, faltas, veredicto, completo };
+      return {
+        structuredContent: structured,
+        content: [{ type: "text", text: JSON.stringify(structured) }],
+      };
+    }
   );
 
   // --- Cierre del ciclo: construir la definición final del agente ------------
@@ -565,7 +608,7 @@ app.get("/mcp", (_req, res) => res.status(405).set("Allow", "POST").send("Method
 app.delete("/mcp", (_req, res) => res.status(405).set("Allow", "POST").send("Method Not Allowed"));
 
 app.get("/health", (_req, res) =>
-  res.json({ name: "el-buen-agente-mcp", version: "2.5.0", status: "ok", endpoint: "/mcp" })
+  res.json({ name: "el-buen-agente-mcp", version: "2.6.0", status: "ok", endpoint: "/mcp" })
 );
 
 app.get("/", (_req, res) => {
@@ -586,7 +629,7 @@ app.get("/", (_req, res) => {
   .pill{display:inline-block;background:rgba(42,122,226,.12);border-radius:999px;padding:.1em .7em;font-size:.85em;margin-right:.4em}
 </style></head><body>
 <h1>🧭 El Buen Agente</h1>
-<p class="sub">Servidor MCP: la guía canónica para construir agentes LLM, convertida en 17 tools accionables. <span class="pill">v2.5.0</span><span class="pill">ES / EN</span></p>
+<p class="sub">Servidor MCP: la guía canónica para construir agentes LLM, convertida en 18 tools accionables. <span class="pill">v2.6.0</span><span class="pill">ES / EN</span></p>
 <p>Le pasás la definición de tu agente y te devuelve: evaluación por dimensión (rol, outputs, autonomía, contexto…), contrato formal, un checklist de nacimiento de 19 puntos como gate de merge, y la definición final lista para usar.</p>
 <h2>Conectar</h2>
 <p><strong>Claude Code:</strong></p>

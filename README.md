@@ -4,7 +4,7 @@
 
 > 🇬🇧 [English version](README.en.md)
 
-Servidor MCP público que convierte la guía **"El Buen Agente"** (criterios canónicos para construir agentes LLM robustos) en **17 tools accionables**: en vez de leer una guía, le pasás la definición de tu agente y te devuelve evaluaciones estructuradas, un contrato formal, un checklist de 19 puntos como gate de merge, y la definición final lista para usar.
+Servidor MCP público que convierte la guía **"El Buen Agente"** (criterios canónicos para construir agentes LLM robustos) en **18 tools accionables**: en vez de leer una guía, le pasás la definición de tu agente y te devuelve evaluaciones estructuradas, un contrato formal, un checklist de 19 puntos como gate de merge, y la definición final lista para usar.
 
 **Endpoint público:** `https://el-buen-agente-mcp-production.up.railway.app/mcp`
 
@@ -50,6 +50,7 @@ checklist_nacimiento (diagnóstico) → tools de las secciones con ❌ → re-co
 | `evaluar_sistema` | §9 | Encaje en el ecosistema de agentes existente |
 | `plan_exposicion_mcp` | §10 | Qué exponer como tool/resource/prompt |
 | `checklist_nacimiento` | §11 | Gate de merge: 19 puntos con veredicto apto/no apto |
+| `validar_veredicto` | - | Valida el veredicto del checklist con `outputSchema` (contrato a nivel protocolo para CI) |
 | `construir_agente` | - | Cierre del ciclo: genera la definición final (markdown / SKILL.md / system prompt) |
 | `plan_de_inicio` | §12 | Plan de despliegue: copiloto → autonomía por evidencia |
 | `get_el_buen_agente` | - | La guía completa en Markdown |

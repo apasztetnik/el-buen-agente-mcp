@@ -51,7 +51,7 @@ const EXPECTED_TOOLS = [
   "revisar_frontera_ejecucion", "aplicar_challenger", "auditar_contexto",
   "challenger_decision", "disenar_evaluacion", "generar_contrato",
   "evaluar_sistema", "plan_exposicion_mcp", "checklist_nacimiento",
-  "construir_agente", "plan_de_inicio",
+  "construir_agente", "plan_de_inicio", "validar_veredicto",
 ];
 
 test("initialize: instructions de flujo + serverInfo", async () => {
@@ -66,7 +66,7 @@ test("initialize: instructions de flujo + serverInfo", async () => {
   assert.ok(r.instructions.includes("EN: This server"), "instructions deben tener resumen en inglés");
 });
 
-test("tools/list: las 17 tools exactas", async () => {
+test("tools/list: las 18 tools exactas", async () => {
   const names = (await rpc("tools/list", {})).tools.map((t) => t.name).sort();
   assert.deepEqual(names, [...EXPECTED_TOOLS].sort());
 });
@@ -179,6 +179,34 @@ test("resource template: secciones individuales de la guía", async () => {
   assert.ok(!r.contents[0].text.includes("## 12."), "solo la sección pedida");
   const lista = await rpc("resources/templates/list", {});
   assert.ok(lista.resourceTemplates.some((x) => x.uriTemplate.includes("seccion/{numero}")));
+});
+
+test("validar_veredicto: outputSchema declarado en tools/list", async () => {
+  const tool = (await rpc("tools/list", {})).tools.find((x) => x.name === "validar_veredicto");
+  assert.ok(tool.outputSchema, "debe declarar outputSchema a nivel protocolo");
+  assert.ok(tool.outputSchema.properties.veredicto, "outputSchema con campo veredicto");
+});
+
+test("validar_veredicto: structuredContent determinístico (apto solo si 0 faltas)", async () => {
+  const puntos19 = (estados) => estados.map((estado, i) => ({ n: i + 1, estado }));
+
+  // todos ok -> apto
+  let r = await rpc("tools/call", { name: "validar_veredicto", arguments: { puntos: puntos19(Array(19).fill("ok")) } });
+  assert.equal(r.structuredContent.veredicto, "apto");
+  assert.equal(r.structuredContent.aptos, 19);
+  assert.equal(r.structuredContent.faltas, 0);
+
+  // una falta -> no_apto aunque el resto cumpla
+  const conFalta = Array(19).fill("ok"); conFalta[5] = "falta";
+  r = await rpc("tools/call", { name: "validar_veredicto", arguments: { puntos: puntos19(conFalta) } });
+  assert.equal(r.structuredContent.veredicto, "no_apto");
+  assert.equal(r.structuredContent.faltas, 1);
+
+  // parciales no bloquean el merge
+  const conParcial = Array(19).fill("ok"); conParcial[0] = "parcial"; conParcial[1] = "parcial";
+  r = await rpc("tools/call", { name: "validar_veredicto", arguments: { puntos: puntos19(conParcial) } });
+  assert.equal(r.structuredContent.veredicto, "apto");
+  assert.equal(r.structuredContent.parciales, 2);
 });
 
 test("guardián: el guión largo (em dash) está prohibido en todo el proyecto", async () => {
