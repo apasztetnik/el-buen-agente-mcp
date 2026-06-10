@@ -62,6 +62,21 @@ También expone la guía como **resource** (`guide://el-buen-agente`) y **prompt
 
 Cada tool empaqueta los criterios de su sección + la definición del agente + un formato de salida estricto (scorecard ✅/⚠️/❌, evidencia citada, máx. 5 recomendaciones, semáforo). El agente que consume la tool ejecuta la evaluación con ese marco: el criterio viaja con la tool, sin importar qué LLM la use.
 
+## Usarlo como gate en CI
+
+`checklist_nacimiento` cierra cada evaluación con un bloque JSON de claves estables (independientes del idioma):
+
+```json
+{"tool":"checklist_nacimiento","aptos":17,"parciales":2,"faltas":0,"veredicto":"apto","puntos":[{"n":1,"estado":"ok"}]}
+```
+
+Eso permite bloquear el merge de un agente que no nace cumpliendo el checklist (§11 de la guía). Ejemplo con Claude Code en un workflow:
+
+```bash
+claude -p "Conectate a el-buen-agente y corré checklist_nacimiento sobre agents/mi-agente.md. Respondé SOLO con el bloque JSON." \
+  | python3 -c "import json,sys; v=json.loads(sys.stdin.read())['veredicto']; exit(0 if v=='apto' else 1)"
+```
+
 ## Desarrollo
 
 ```bash
@@ -72,6 +87,10 @@ npm start          # http://localhost:3000/mcp
 La guía fuente es [`el_buen_agente.md`](el_buen_agente.md) — el servidor la parsea por secciones al arrancar. Para cambiar los criterios, editá ese archivo.
 
 **Stack:** Node 18+, Express, [`@modelcontextprotocol/sdk`](https://github.com/modelcontextprotocol/typescript-sdk) (Streamable HTTP, stateless). Rate limit: 60 req/min por IP, 600 global.
+
+**Tests:** `npm test` (suite determinística + fixtures en [`golden/`](golden/) con veredictos esperados). El CI corre en cada push y Railway no despliega sin el check verde.
+
+**Privacidad:** el servidor loggea solo el nombre de la tool llamada y el idioma — nunca el contenido de las definiciones evaluadas.
 
 ## Licencia
 

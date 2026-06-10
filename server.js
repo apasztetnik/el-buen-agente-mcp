@@ -135,7 +135,7 @@ const LANGUAGE = z
 // ---------------------------------------------------------------------------
 function buildServer() {
   const server = new McpServer(
-    { name: "el-buen-agente", version: "2.3.0" },
+    { name: "el-buen-agente", version: "2.4.0" },
     { instructions: FLOW_INSTRUCTIONS }
   );
 
@@ -388,7 +388,12 @@ Proponé el mapeo concreto: lista de tools/resources/prompts a exponer con nombr
     },
     async ({ agent_definition, language }) => withNext("checklist_nacimiento", evalBrief("11", agent_definition,
       `## Instrucción adicional
-Evaluá los 19 puntos UNO POR UNO en una tabla: | # | Punto | Veredicto | Evidencia |. Al final: cantidad de ✅/⚠️/❌ y veredicto de merge (apto / no apto). Sé estricto: sin evidencia explícita en la definición, el punto no cumple.`,
+Evaluá los 19 puntos UNO POR UNO en una tabla: | # | Punto | Veredicto | Evidencia |. Al final: cantidad de ✅/⚠️/❌ y veredicto de merge (apto / no apto). Sé estricto: sin evidencia explícita en la definición, el punto no cumple.
+
+## Bloque máquina (para CI)
+Cerrá tu evaluación con un bloque de código JSON (cercado con \`\`\`json) con EXACTAMENTE esta forma:
+{"tool":"checklist_nacimiento","aptos":N,"parciales":N,"faltas":N,"veredicto":"apto","puntos":[{"n":1,"estado":"ok"},{"n":2,"estado":"parcial"},{"n":3,"estado":"falta"}]}
+Reglas del bloque: claves y valores de "estado" (ok|parcial|falta) y "veredicto" (apto|no_apto) van SIEMPRE así, sin traducir, independientemente del idioma de la evaluación. "veredicto" es "apto" solo si faltas == 0. Los 19 puntos deben estar presentes en "puntos".`,
       language
     ))
   );
@@ -505,6 +510,13 @@ if (process.env.DISABLE_RATE_LIMIT !== "1") {
 }
 
 app.post("/mcp", async (req, res) => {
+  // Analytics mínimas: qué se llama, nunca el contenido
+  const m = req.body;
+  if (m?.method === "tools/call") {
+    console.log(JSON.stringify({ evt: "tool_call", tool: m.params?.name, lang: m.params?.arguments?.language ?? "es" }));
+  } else if (m?.method === "initialize") {
+    console.log(JSON.stringify({ evt: "initialize", client: m.params?.clientInfo?.name ?? "unknown" }));
+  }
   const server = buildServer();
   const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
   res.on("close", () => {
@@ -529,9 +541,47 @@ app.post("/mcp", async (req, res) => {
 app.get("/mcp", (_req, res) => res.status(405).set("Allow", "POST").send("Method Not Allowed"));
 app.delete("/mcp", (_req, res) => res.status(405).set("Allow", "POST").send("Method Not Allowed"));
 
-app.get("/", (_req, res) =>
-  res.json({ name: "el-buen-agente-mcp", version: "2.3.0", status: "ok", endpoint: "/mcp" })
+app.get("/health", (_req, res) =>
+  res.json({ name: "el-buen-agente-mcp", version: "2.4.0", status: "ok", endpoint: "/mcp" })
 );
+
+app.get("/", (_req, res) => {
+  res.type("html").send(`<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El Buen Agente — MCP Server</title>
+<style>
+  :root{color-scheme:light dark}
+  body{font-family:ui-sans-serif,system-ui,sans-serif;max-width:760px;margin:3rem auto;padding:0 1.2rem;line-height:1.6}
+  code,pre{background:rgba(127,127,127,.12);border-radius:6px}
+  code{padding:.15em .4em}
+  pre{padding:1em;overflow-x:auto}
+  pre code{padding:0;background:none}
+  h1{margin-bottom:.2em} .sub{opacity:.75;margin-top:0}
+  table{border-collapse:collapse;width:100%;font-size:.92em}
+  td,th{border-bottom:1px solid rgba(127,127,127,.25);padding:.4em .6em;text-align:left}
+  a{color:#2a7ae2}
+  .pill{display:inline-block;background:rgba(42,122,226,.12);border-radius:999px;padding:.1em .7em;font-size:.85em;margin-right:.4em}
+</style></head><body>
+<h1>🧭 El Buen Agente</h1>
+<p class="sub">Servidor MCP — la guía canónica para construir agentes LLM, convertida en 17 tools accionables. <span class="pill">v2.4.0</span><span class="pill">ES / EN</span></p>
+<p>Le pasás la definición de tu agente y te devuelve: evaluación por dimensión (rol, outputs, autonomía, contexto…), contrato formal, un checklist de nacimiento de 19 puntos como gate de merge, y la definición final lista para usar.</p>
+<h2>Conectar</h2>
+<p><strong>Claude Code:</strong></p>
+<pre><code>claude mcp add --transport http el-buen-agente https://el-buen-agente-mcp-production.up.railway.app/mcp</code></pre>
+<p><strong>Cursor, Claude Desktop o cualquier cliente MCP:</strong> agregá <code>https://el-buen-agente-mcp-production.up.railway.app/mcp</code> como servidor HTTP (sin autenticación).</p>
+<h2>El flujo</h2>
+<pre><code>evaluar_necesidad → revisiones §1–§7 → generar_contrato
+→ checklist_nacimiento (GATE) → construir_agente → plan_de_inicio</code></pre>
+<p>El servidor recomienda el orden solo: cada respuesta incluye el siguiente paso, y la tool <code>recomendar_flujo</code> devuelve el plan completo. Todas las tools aceptan <code>language: "en"</code>.</p>
+<h2>Links</h2>
+<table>
+<tr><td>📦 Código y docs</td><td><a href="https://github.com/apasztetnik/el-buen-agente-mcp">github.com/apasztetnik/el-buen-agente-mcp</a></td></tr>
+<tr><td>🗂 Registry MCP</td><td><code>io.github.apasztetnik/el-buen-agente-mcp</code></td></tr>
+<tr><td>❤️ Estado</td><td><a href="/health">/health</a></td></tr>
+</table>
+<p style="opacity:.6;font-size:.85em;margin-top:2.5rem">Hecho con la guía "El Buen Agente" — que también se aplica a sí misma: golden set, tests como gate de deploy, y rate limiting (60 req/min). Solo se loggea el nombre de la tool llamada, nunca el contenido.</p>
+</body></html>`);
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

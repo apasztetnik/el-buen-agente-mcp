@@ -153,6 +153,26 @@ test("golden fixtures: se embeben completos en el brief del checklist", async ()
   }
 });
 
+test("checklist: contrato JSON para CI con claves estables", async () => {
+  const t = await callTool("checklist_nacimiento", { agent_definition: "x" });
+  assert.ok(t.includes("Bloque máquina (para CI)"), "instrucción del bloque máquina");
+  assert.ok(t.includes('"veredicto":"apto"'), "schema de ejemplo presente");
+  assert.ok(t.includes("sin traducir"), "claves estables independientes del idioma");
+  // el contrato también debe estar cuando la evaluación es en inglés
+  const en = await callTool("checklist_nacimiento", { agent_definition: "x", language: "en" });
+  assert.ok(en.includes("Bloque máquina (para CI)"));
+});
+
+test("landing en / es HTML y /health responde JSON", async () => {
+  const html = await (await fetch(`${BASE}/`)).text();
+  assert.ok(html.includes("<!doctype html>"));
+  assert.ok(html.includes("El Buen Agente"));
+  assert.ok(html.includes("claude mcp add"));
+  const health = await (await fetch(`${BASE}/health`)).json();
+  assert.equal(health.status, "ok");
+  assert.equal(health.endpoint, "/mcp");
+});
+
 test("todas las tools de evaluación responden con su sección correcta", async () => {
   const secciones = [
     ["revisar_rol_y_frontera", "§1"], ["revisar_outputs", "§2"],
