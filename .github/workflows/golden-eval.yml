@@ -1,0 +1,28 @@
+name: Golden Eval (LLM)
+
+# Evaluación con modelo real contra el golden set. Manual a propósito:
+# consume API de Anthropic, no conviene pagarla en cada push.
+# Correrla antes de mergear cambios a el_buen_agente.md o a los briefs.
+# Requiere el secret ANTHROPIC_API_KEY en el repo.
+on:
+  workflow_dispatch:
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Golden eval contra modelo real
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error::Falta el secret ANTHROPIC_API_KEY (Settings > Secrets and variables > Actions)"
+            exit 1
+          fi
+          npm run eval:golden
