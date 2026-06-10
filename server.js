@@ -46,7 +46,7 @@ Presentá la evaluación de forma amigable para una persona que puede no ser exp
 
 Reglas: citá evidencia de la definición cuando ayude, pero traducida a lenguaje simple. La ausencia también es evidencia ("tu definición no menciona X"). No inventes cumplimientos. Decí lo que falta sin suavizarlo, pero siempre acompañado del cómo arreglarlo.`;
 
-function evalBrief(sectionNum, agentDefinition, extra = "") {
+function evalBrief(sectionNum, agentDefinition, extra = "", language = "es") {
   const s = SECTIONS[sectionNum];
   return [
     `# 🔍 Revisión §${sectionNum} — ${s.title}`,
@@ -63,6 +63,9 @@ function evalBrief(sectionNum, agentDefinition, extra = "") {
     "```",
     ``,
     OUTPUT_FORMAT,
+    language === "en"
+      ? `\n## Response language\nIMPORTANT: Write your ENTIRE evaluation in English. The criteria above are in Spanish — apply them faithfully, translating concepts and section names as you go. Keep the scorecard/semaphore structure.`
+      : ``,
   ].join("\n");
 }
 
@@ -112,7 +115,7 @@ const FLOW_INSTRUCTIONS = `Este servidor expone la guía "El Buen Agente" como t
 
 **Transversales:** \`aplicar_challenger\` / \`challenger_decision\` después de cualquier rediseño; \`evaluar_sistema\` y \`plan_exposicion_mcp\` cuando el agente convive con otros o expone valor a terceros.
 
-Cada respuesta de tool incluye el siguiente paso recomendado. Ante la duda, llamá \`recomendar_flujo\`.`;
+Cada respuesta de tool incluye el siguiente paso recomendado. Ante la duda, llamá \`recomendar_flujo\`.\n\nEN: This server turns the \"El Buen Agente\" guide into an ordered tool flow for evaluating and building LLM agents. All evaluation tools accept language:\"en\" for English output. Call \`recomendar_flujo\` first if unsure where to start.`;
 
 const AGENT_DEF = z
   .string()
@@ -122,12 +125,17 @@ const AGENT_DEF = z
       "descripción de tools y cualquier doc de diseño. Cuanto más completa, mejor la evaluación."
   );
 
+const LANGUAGE = z
+  .enum(["es", "en"])
+  .optional()
+  .describe('Idioma de la respuesta (default "es"). / Response language — pass "en" for English output.');
+
 // ---------------------------------------------------------------------------
 // Servidor MCP
 // ---------------------------------------------------------------------------
 function buildServer() {
   const server = new McpServer(
-    { name: "el-buen-agente", version: "2.2.0" },
+    { name: "el-buen-agente", version: "2.3.0" },
     { instructions: FLOW_INSTRUCTIONS }
   );
 
@@ -202,11 +210,13 @@ function buildServer() {
         problema: z
           .string()
           .describe("Descripción del problema que se quiere resolver y, si existe, cómo lo resuelve el agente actual."),
+        language: LANGUAGE,
       },
     },
-    async ({ problema }) => withNext("evaluar_necesidad", evalBrief("0", problema,
+    async ({ problema, language }) => withNext("evaluar_necesidad", evalBrief("0", problema,
       `## Instrucción adicional
-Determiná el nivel mínimo suficiente (1-Prompt, 2-Workflow, 3-Skill, 4-Agente, 5-Multi-agente) y justificalo. Si el nivel propuesto/actual es mayor al necesario, marcalo como sobre-ingeniería y proponé la alternativa más simple.`
+Determiná el nivel mínimo suficiente (1-Prompt, 2-Workflow, 3-Skill, 4-Agente, 5-Multi-agente) y justificalo. Si el nivel propuesto/actual es mayor al necesario, marcalo como sobre-ingeniería y proponé la alternativa más simple.`,
+      language
     ))
   );
 
@@ -225,9 +235,9 @@ Determiná el nivel mínimo suficiente (1-Prompt, 2-Workflow, 3-Skill, 4-Agente,
       {
         title: `§${num} — ${SECTIONS[num].title}`,
         description: desc + " Recibe la definición del agente y devuelve un brief de evaluación estructurado.",
-        inputSchema: { agent_definition: AGENT_DEF },
+        inputSchema: { agent_definition: AGENT_DEF, language: LANGUAGE },
       },
-      async ({ agent_definition }) => withNext(name, evalBrief(num, agent_definition))
+      async ({ agent_definition, language }) => withNext(name, evalBrief(num, agent_definition, "", language))
     );
   }
 
@@ -241,9 +251,10 @@ Determiná el nivel mínimo suficiente (1-Prompt, 2-Workflow, 3-Skill, 4-Agente,
       inputSchema: {
         decision: z.string().describe("La decisión o recomendación del agente que se quiere cuestionar."),
         contexto: z.string().optional().describe("Contexto y datos relevantes a la decisión."),
+        language: LANGUAGE,
       },
     },
-    async ({ decision, contexto }) =>
+    async ({ decision, contexto, language }) =>
       withNext("challenger_decision",
         [
           `# Tarea: challenger / red-team de una decisión (§5 de El Buen Agente)`,
@@ -258,6 +269,7 @@ Determiná el nivel mínimo suficiente (1-Prompt, 2-Workflow, 3-Skill, 4-Agente,
           `1. **3 razones para NO hacer esto**, cada una anclada en datos o riesgos concretos (no objeciones genéricas).`,
           `2. **Condiciones bajo las cuales la decisión sí sería correcta** (qué tendría que ser cierto).`,
           `3. **Veredicto**: mantener / modificar / frenar, con justificación de una frase.`,
+          language === "en" ? `\nIMPORTANT: Respond entirely in English.` : ``,
         ].join("\n")
       )
   );
@@ -270,11 +282,12 @@ Determiná el nivel mínimo suficiente (1-Prompt, 2-Workflow, 3-Skill, 4-Agente,
       description:
         "Evalúa el plan de evaluación del agente (o ayuda a crearlo): 3 dimensiones (capacidades/trayectoria/resultado), " +
         "métricas (tasa de éxito, consistencia, coste por tarea, adopción), golden set de 20-50 tareas, monitoreo de drift y self-consistency para alto stake.",
-      inputSchema: { agent_definition: AGENT_DEF },
+      inputSchema: { agent_definition: AGENT_DEF, language: LANGUAGE },
     },
-    async ({ agent_definition }) => withNext("disenar_evaluacion", evalBrief("7", agent_definition,
+    async ({ agent_definition, language }) => withNext("disenar_evaluacion", evalBrief("7", agent_definition,
       `## Instrucción adicional
-Si el agente no tiene plan de evaluación, proponé uno: 5 tareas ejemplo para el golden set (derivadas de la definición), criterio de éxito verificable para cada una, y las 4 métricas con umbrales sugeridos.`
+Si el agente no tiene plan de evaluación, proponé uno: 5 tareas ejemplo para el golden set (derivadas de la definición), criterio de éxito verificable para cada una, y las 4 métricas con umbrales sugeridos.`,
+      language
     ))
   );
 
@@ -296,28 +309,33 @@ Si el agente no tiene plan de evaluación, proponé uno: 5 tareas ejemplo para e
         coste: z.string().optional().describe("Modelo + estimado de tokens/mes + tope."),
         evaluacion: z.string().optional().describe("Métricas de éxito (verde/amarillo/rojo) + cadencia de review."),
         autonomia: z.string().optional().describe("copiloto | supervisado | autónomo con guardrails (+ plan de progresión)."),
+        language: LANGUAGE,
       },
     },
     async (f) => {
-      const p = (v) => v ?? "[PENDIENTE]";
+      const en = f.language === "en";
+      const L = en
+        ? { agente: "AGENT", problema: "PROBLEM", inputs: "INPUTS", output: "OUTPUT", puede: "CAN", no_puede: "CANNOT", coste: "COST", evaluacion: "EVALUATION", autonomia: "AUTONOMY", pendiente: "[TBD]" }
+        : { agente: "AGENTE", problema: "PROBLEMA", inputs: "INPUTS", output: "OUTPUT", puede: "PUEDE", no_puede: "NO PUEDE", coste: "COSTE", evaluacion: "EVALUACIÓN", autonomia: "AUTONOMÍA", pendiente: "[PENDIENTE]" };
+      const p = (v) => v ?? L.pendiente;
       const pendientes = ["problema", "inputs", "output", "puede", "no_puede", "coste", "evaluacion", "autonomia"]
         .filter((k) => !f[k]);
       return withNext("generar_contrato",
         [
           "```",
-          `AGENTE: ${f.nombre}`,
-          `PROBLEMA: ${p(f.problema)}`,
-          `INPUTS: ${p(f.inputs)}`,
-          `OUTPUT: ${p(f.output)}`,
-          `PUEDE: ${p(f.puede)}`,
-          `NO PUEDE: ${p(f.no_puede)}`,
-          `COSTE: ${p(f.coste)}`,
-          `EVALUACIÓN: ${p(f.evaluacion)}`,
-          `AUTONOMÍA: ${p(f.autonomia)}`,
+          `${L.agente}: ${f.nombre}`,
+          `${L.problema}: ${p(f.problema)}`,
+          `${L.inputs}: ${p(f.inputs)}`,
+          `${L.output}: ${p(f.output)}`,
+          `${L.puede}: ${p(f.puede)}`,
+          `${L.no_puede}: ${p(f.no_puede)}`,
+          `${L.coste}: ${p(f.coste)}`,
+          `${L.evaluacion}: ${p(f.evaluacion)}`,
+          `${L.autonomia}: ${p(f.autonomia)}`,
           "```",
           pendientes.length
-            ? `\n⚠️ Campos pendientes: ${pendientes.join(", ")}. Un contrato con pendientes no habilita el merge del agente (§11.14).`
-            : `\n✅ Contrato completo. Documentalo junto al agente y revisalo en la cadencia definida.`,
+            ? (en ? `\n⚠️ Pending fields: ${pendientes.join(", ")}. A contract with pending fields does not allow merging the agent (§11.14).` : `\n⚠️ Campos pendientes: ${pendientes.join(", ")}. Un contrato con pendientes no habilita el merge del agente (§11.14).`)
+            : (en ? `\n✅ Contract complete. Document it next to the agent and review it at the defined cadence.` : `\n✅ Contrato completo. Documentalo junto al agente y revisalo en la cadencia definida.`),
         ].join("\n")
       );
     }
@@ -334,10 +352,11 @@ Si el agente no tiene plan de evaluación, proponé uno: 5 tareas ejemplo para e
       inputSchema: {
         agent_definition: AGENT_DEF,
         ecosistema: z.string().optional().describe("Otros agentes/skills existentes en el sistema, si los hay."),
+        language: LANGUAGE,
       },
     },
-    async ({ agent_definition, ecosistema }) =>
-      withNext("evaluar_sistema", evalBrief("9", agent_definition + (ecosistema ? `\n\n--- ECOSISTEMA EXISTENTE ---\n${ecosistema}` : "")))
+    async ({ agent_definition, ecosistema, language }) =>
+      withNext("evaluar_sistema", evalBrief("9", agent_definition + (ecosistema ? `\n\n--- ECOSISTEMA EXISTENTE ---\n${ecosistema}` : ""), "", language))
   );
 
   // --- §10: plan de exposición MCP --------------------------------------------
@@ -348,11 +367,12 @@ Si el agente no tiene plan de evaluación, proponé uno: 5 tareas ejemplo para e
       description:
         "Evalúa qué partes del agente conviene exponer a la economía de agentes y cómo: " +
         "qué modelar como tool (capacidad accionable), resource (doc/dato legible) o prompt (plantilla), y qué merece UI vs API/MCP.",
-      inputSchema: { agent_definition: AGENT_DEF },
+      inputSchema: { agent_definition: AGENT_DEF, language: LANGUAGE },
     },
-    async ({ agent_definition }) => withNext("plan_exposicion_mcp", evalBrief("10", agent_definition,
+    async ({ agent_definition, language }) => withNext("plan_exposicion_mcp", evalBrief("10", agent_definition,
       `## Instrucción adicional
-Proponé el mapeo concreto: lista de tools/resources/prompts a exponer con nombre, descripción e input schema sugeridos.`
+Proponé el mapeo concreto: lista de tools/resources/prompts a exponer con nombre, descripción e input schema sugeridos.`,
+      language
     ))
   );
 
@@ -364,11 +384,12 @@ Proponé el mapeo concreto: lista de tools/resources/prompts a exponer con nombr
       description:
         "Corre el checklist completo de 19 puntos contra la definición del agente. Es el gate final antes de mergear: " +
         "el agente debe NACER cumpliéndolo, no corregirse después. Devuelve veredicto punto por punto.",
-      inputSchema: { agent_definition: AGENT_DEF },
+      inputSchema: { agent_definition: AGENT_DEF, language: LANGUAGE },
     },
-    async ({ agent_definition }) => withNext("checklist_nacimiento", evalBrief("11", agent_definition,
+    async ({ agent_definition, language }) => withNext("checklist_nacimiento", evalBrief("11", agent_definition,
       `## Instrucción adicional
-Evaluá los 19 puntos UNO POR UNO en una tabla: | # | Punto | Veredicto | Evidencia |. Al final: cantidad de ✅/⚠️/❌ y veredicto de merge (apto / no apto). Sé estricto: sin evidencia explícita en la definición, el punto no cumple.`
+Evaluá los 19 puntos UNO POR UNO en una tabla: | # | Punto | Veredicto | Evidencia |. Al final: cantidad de ✅/⚠️/❌ y veredicto de merge (apto / no apto). Sé estricto: sin evidencia explícita en la definición, el punto no cumple.`,
+      language
     ))
   );
 
@@ -388,9 +409,10 @@ Evaluá los 19 puntos UNO POR UNO en una tabla: | # | Punto | Veredicto | Eviden
           .enum(["markdown", "claude_skill", "system_prompt"])
           .optional()
           .describe("Formato del artefacto: 'markdown' (doc de diseño completo, default), 'claude_skill' (SKILL.md con frontmatter), 'system_prompt' (prompt + config para cualquier framework)."),
+        language: LANGUAGE,
       },
     },
-    async ({ definicion_final, contrato, formato = "markdown" }) => {
+    async ({ definicion_final, contrato, formato = "markdown", language }) => {
       const formatos = {
         markdown: "un documento Markdown de diseño completo (AGENT.md) listo para commitear en el repo del agente",
         claude_skill: "un SKILL.md con frontmatter (name, description, allowed-tools) listo para ~/.claude/skills/ o .claude/agents/",
@@ -421,6 +443,7 @@ Evaluá los 19 puntos UNO POR UNO en una tabla: | # | Punto | Veredicto | Eviden
         `- Todo lo que la definición ya decidió se respeta; lo que falte, marcalo como [DECIDIR: ...] — no lo inventes.`,
         `- El artefacto debe poder usarse tal cual: sin placeholders vacíos, sin "aquí va tu prompt".`,
         `- Cerrá el artefacto con una sección "Implementación" de máximo 5 pasos: qué construir en código (gates, límites, audit log) vs qué vive en el prompt.`,
+        language === "en" ? `\n## Language\nProduce the ENTIRE artifact in English, translating the guide's concepts faithfully.` : ``,
       ].join("\n"));
     }
   );
@@ -436,11 +459,13 @@ Evaluá los 19 puntos UNO POR UNO en una tabla: | # | Punto | Veredicto | Eviden
       inputSchema: {
         problema: z.string().describe("El problema o tarea candidata para el primer agente."),
         equipo: z.string().optional().describe("Quiénes lo van a usar y revisar."),
+        language: LANGUAGE,
       },
     },
-    async ({ problema, equipo }) => withNext("plan_de_inicio", evalBrief("12", problema + (equipo ? `\n\nEquipo: ${equipo}` : ""),
+    async ({ problema, equipo, language }) => withNext("plan_de_inicio", evalBrief("12", problema + (equipo ? `\n\nEquipo: ${equipo}` : ""),
       `## Instrucción adicional
-Devolvé un plan de 4 semanas: semana 1 (copiloto + comparación con el proceso actual), criterios de promoción de autonomía, y la condición de kill (si no funciona, cómo se decide abandonar barato).`
+Devolvé un plan de 4 semanas: semana 1 (copiloto + comparación con el proceso actual), criterios de promoción de autonomía, y la condición de kill (si no funciona, cómo se decide abandonar barato).`,
+      language
     ))
   );
 
@@ -502,7 +527,7 @@ app.get("/mcp", (_req, res) => res.status(405).set("Allow", "POST").send("Method
 app.delete("/mcp", (_req, res) => res.status(405).set("Allow", "POST").send("Method Not Allowed"));
 
 app.get("/", (_req, res) =>
-  res.json({ name: "el-buen-agente-mcp", version: "2.2.0", status: "ok", endpoint: "/mcp" })
+  res.json({ name: "el-buen-agente-mcp", version: "2.3.0", status: "ok", endpoint: "/mcp" })
 );
 
 const PORT = process.env.PORT || 3000;

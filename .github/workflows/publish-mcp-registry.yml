@@ -1,0 +1,39 @@
+name: Publish to MCP Registry
+
+# Publica al registry oficial cuando se pushea un tag vX.Y.Z
+# La versión publicada se toma del tag (server.json se actualiza al vuelo).
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  id-token: write   # OIDC: autentica el namespace io.github.* sin secrets
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install mcp-publisher
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download -R modelcontextprotocol/registry \
+            -p "mcp-publisher_*_linux_amd64.tar.gz" -O mcp-publisher.tar.gz
+          tar xzf mcp-publisher.tar.gz mcp-publisher
+          ./mcp-publisher --version
+
+      - name: Set version from tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          jq --arg v "$VERSION" '.version = $v' server.json > server.json.tmp
+          mv server.json.tmp server.json
+          echo "Publishing version $VERSION"
+
+      - name: Login (GitHub OIDC)
+        run: ./mcp-publisher login github-oidc
+
+      - name: Publish
+        run: ./mcp-publisher publish

@@ -52,6 +52,10 @@ checklist_nacimiento (diagnóstico) → tools de las secciones con ❌ → re-co
 
 También expone la guía como **resource** (`guide://el-buen-agente`) y **prompt**.
 
+**🇬🇧 English:** every evaluation tool accepts `language: "en"` for English output (the underlying guide is Spanish; criteria are translated on the fly by the consuming agent).
+
+**Registry:** publicado en el [registry oficial MCP](https://registry.modelcontextprotocol.io) como `io.github.apasztetnik/el-buen-agente-mcp`. Las releases se publican automáticamente al pushear un tag `vX.Y.Z` (GitHub Action con OIDC).
+
 ## Cómo funciona
 
 Cada tool empaqueta los criterios de su sección + la definición del agente + un formato de salida estricto (scorecard ✅/⚠️/❌, evidencia citada, máx. 5 recomendaciones, semáforo). El agente que consume la tool ejecuta la evaluación con ese marco: el criterio viaja con la tool, sin importar qué LLM la use.
