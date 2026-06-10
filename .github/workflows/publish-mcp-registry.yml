@@ -21,7 +21,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release download -R modelcontextprotocol/registry \
-            -p "mcp-publisher_*_linux_amd64.tar.gz" -O mcp-publisher.tar.gz
+            -p "mcp-publisher_linux_amd64.tar.gz" -O mcp-publisher.tar.gz
           tar xzf mcp-publisher.tar.gz mcp-publisher
           ./mcp-publisher --version
 
