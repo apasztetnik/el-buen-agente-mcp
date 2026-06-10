@@ -93,6 +93,8 @@ The source of truth is [`el_buen_agente.md`](el_buen_agente.md); the server pars
 
 **Privacy:** the server only logs the tool name and language of each call, never the content of evaluated definitions.
 
+**Version history:** see [CHANGELOG.md](CHANGELOG.md).
+
 ## License
 
 MIT

@@ -94,6 +94,8 @@ La guía fuente es [`el_buen_agente.md`](el_buen_agente.md), el servidor la pars
 
 **Privacidad:** el servidor loggea solo el nombre de la tool llamada y el idioma, nunca el contenido de las definiciones evaluadas.
 
+**Historial de versiones:** ver [CHANGELOG.md](CHANGELOG.md).
+
 ## Licencia
 
 MIT
