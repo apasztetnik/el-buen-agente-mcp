@@ -1,4 +1,4 @@
-# El Buen Agente — MCP Server
+# El Buen Agente | MCP Server
 
 [![MCP Registry](https://img.shields.io/badge/MCP_Registry-io.github.apasztetnik%2Fel--buen--agente--mcp-blue)](https://registry.modelcontextprotocol.io/v0/servers?search=el-buen-agente) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
@@ -34,7 +34,7 @@ checklist_nacimiento (diagnóstico) → tools de las secciones con ❌ → re-co
 
 | Tool | Sección | Qué hace |
 |---|---|---|
-| `recomendar_flujo` | — | Devuelve el plan ordenado según la situación (nuevo/existente) |
+| `recomendar_flujo` | - | Devuelve el plan ordenado según la situación (nuevo/existente) |
 | `evaluar_necesidad` | §0 | ¿Hace falta un agente o alcanza con menos? Detecta antipatrones |
 | `revisar_rol_y_frontera` | §1 | Rol claro, dominio acotado, qué NO hace |
 | `revisar_outputs` | §2 | Schema estricto, resumen humano, gates expuestos |
@@ -48,11 +48,11 @@ checklist_nacimiento (diagnóstico) → tools de las secciones con ❌ → re-co
 | `evaluar_sistema` | §9 | Encaje en el ecosistema de agentes existente |
 | `plan_exposicion_mcp` | §10 | Qué exponer como tool/resource/prompt |
 | `checklist_nacimiento` | §11 | Gate de merge: 19 puntos con veredicto apto/no apto |
-| `construir_agente` | — | Cierre del ciclo: genera la definición final (markdown / SKILL.md / system prompt) |
+| `construir_agente` | - | Cierre del ciclo: genera la definición final (markdown / SKILL.md / system prompt) |
 | `plan_de_inicio` | §12 | Plan de despliegue: copiloto → autonomía por evidencia |
-| `get_el_buen_agente` | — | La guía completa en Markdown |
+| `get_el_buen_agente` | - | La guía completa en Markdown |
 
-También expone la guía como **resource** (`guide://el-buen-agente`) y **prompt**.
+También expone la guía como **resource** (`guide://el-buen-agente` completa, o por sección: `guide://el-buen-agente/seccion/{0-12}`) y como **prompt**.
 
 **🇬🇧 English:** every evaluation tool accepts `language: "en"` for English output (the underlying guide is Spanish; criteria are translated on the fly by the consuming agent).
 
@@ -84,13 +84,13 @@ npm install
 npm start          # http://localhost:3000/mcp
 ```
 
-La guía fuente es [`el_buen_agente.md`](el_buen_agente.md) — el servidor la parsea por secciones al arrancar. Para cambiar los criterios, editá ese archivo.
+La guía fuente es [`el_buen_agente.md`](el_buen_agente.md), el servidor la parsea por secciones al arrancar. Para cambiar los criterios, editá ese archivo.
 
 **Stack:** Node 18+, Express, [`@modelcontextprotocol/sdk`](https://github.com/modelcontextprotocol/typescript-sdk) (Streamable HTTP, stateless). Rate limit: 60 req/min por IP, 600 global.
 
 **Tests:** `npm test` (suite determinística + fixtures en [`golden/`](golden/) con veredictos esperados). El CI corre en cada push y Railway no despliega sin el check verde.
 
-**Privacidad:** el servidor loggea solo el nombre de la tool llamada y el idioma — nunca el contenido de las definiciones evaluadas.
+**Privacidad:** el servidor loggea solo el nombre de la tool llamada y el idioma, nunca el contenido de las definiciones evaluadas.
 
 ## Licencia
 

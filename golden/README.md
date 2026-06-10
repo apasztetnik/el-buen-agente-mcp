@@ -4,9 +4,9 @@ Fixtures de definiciones de agentes con **veredicto esperado**, según §7 de la
 
 ## Dos niveles de uso
 
-**1. Tests determinísticos (automático, CI)** — `npm test` verifica que el servidor arma los briefs correctamente: criterios de la sección correcta, definición embebida sin truncar, formato de salida, hints de flujo, soporte `language:"en"`, contrato exacto. Corre en cada push y bloquea el deploy si falla.
+**1. Tests determinísticos (automático, CI)**: `npm test` verifica que el servidor arma los briefs correctamente: criterios de la sección correcta, definición embebida sin truncar, formato de salida, hints de flujo, soporte `language:"en"`, contrato exacto. Corre en cada push y bloquea el deploy si falla.
 
-**2. Evaluación LLM (manual, antes de cambios grandes en la guía)** — pasale cada fixture a un agente conectado al servidor y compará contra el veredicto esperado anotado en el encabezado del fixture:
+**2. Evaluación LLM (manual, antes de cambios grandes en la guía)**: pasale cada fixture a un agente conectado al servidor y compará contra el veredicto esperado anotado en el encabezado del fixture:
 
 | Fixture | Tool | Veredicto esperado |
 |---|---|---|

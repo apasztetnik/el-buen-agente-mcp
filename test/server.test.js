@@ -133,7 +133,7 @@ test("construir_agente: formato claude_skill + contrato embebido + hint a plan_d
   assert.ok(t.includes("DEF_MARCADOR"));
   assert.ok(t.includes("CONTRATO_MARCADOR"), "contrato embebido tal cual");
   assert.ok(t.includes("plan_de_inicio"), "hint de cierre");
-  assert.ok(t.includes("NO evalúes — construí"));
+  assert.ok(t.includes("NO evalúes: construí"));
 });
 
 test("recomendar_flujo: nuevo arranca en necesidad, existente en checklist", async () => {
@@ -171,6 +171,34 @@ test("landing en / es HTML y /health responde JSON", async () => {
   const health = await (await fetch(`${BASE}/health`)).json();
   assert.equal(health.status, "ok");
   assert.equal(health.endpoint, "/mcp");
+});
+
+test("resource template: secciones individuales de la guía", async () => {
+  const r = await rpc("resources/read", { uri: "guide://el-buen-agente/seccion/11" });
+  assert.ok(r.contents[0].text.includes("Checklist de nacimiento"));
+  assert.ok(!r.contents[0].text.includes("## 12."), "solo la sección pedida");
+  const lista = await rpc("resources/templates/list", {});
+  assert.ok(lista.resourceTemplates.some((x) => x.uriTemplate.includes("seccion/{numero}")));
+});
+
+test("guardián: el guión largo (em dash) está prohibido en todo el proyecto", async () => {
+  // Regla del proyecto: el carácter em dash (U+2014) no debe existir en ningún
+  // archivo ni en ninguna respuesta del servidor. Este test bloquea el deploy.
+  const { execSync } = await import("node:child_process");
+  const files = execSync("git ls-files", { cwd: join(__dirname, "..") })
+    .toString().trim().split("\n")
+    .filter((f) => !f.endsWith(".png") && !f.endsWith(".lock"));
+  for (const f of files) {
+    const content = readFileSync(join(__dirname, "..", f), "utf-8");
+    assert.ok(!content.includes("\u2014"), `em dash encontrado en ${f}`);
+  }
+  // y en las respuestas vivas del servidor
+  const landing = await (await fetch(`${BASE}/`)).text();
+  assert.ok(!landing.includes("\u2014"), "em dash en la landing");
+  const brief = await callTool("checklist_nacimiento", { agent_definition: "x" });
+  assert.ok(!brief.includes("\u2014"), "em dash en un brief");
+  const flujo = await callTool("recomendar_flujo", { situacion: "nuevo" });
+  assert.ok(!flujo.includes("\u2014"), "em dash en recomendar_flujo");
 });
 
 test("todas las tools de evaluación responden con su sección correcta", async () => {

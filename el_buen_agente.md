@@ -5,7 +5,7 @@ allowed-tools: Read Glob Bash
 context: fork
 ---
 
-# El Buen Agente (v2, canónica) — guía definitiva para construir agentes LLM
+# El Buen Agente (v2, canónica), guía definitiva para construir agentes LLM
 
 > Versión genérica y portable. No asume stack, lenguaje ni dominio. 
 >
