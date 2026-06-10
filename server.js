@@ -31,25 +31,25 @@ const GUIDE_DESCRIPTION =
   "Cubre cuándo construir (y cuándo no), anatomía mínima, contexto como activo, evaluación, " +
   "el contrato de agente y la exposición vía MCP.";
 
-const OUTPUT_FORMAT = `## Cómo presentar el resultado
-Presentá la evaluación de forma amigable para una persona que puede no ser experta en agentes. Sé estricto en el criterio, cálido en la forma:
+const OUTPUT_FORMAT = `## Formato del resultado
+Escribís para una persona técnica que está construyendo un agente: directo, preciso, sin relleno ni condescendencia. Estructura:
 
-🎯 **Resumen**: una frase en lenguaje claro: ¿qué tan bien está esta dimensión?
+**Resumen.** Una o dos frases con el estado de esta dimensión y, si lo hay, el riesgo principal.
 
-📊 **Scorecard**: tabla compacta:
-| Criterio | Estado | ¿Por qué? |
-(✅ cumple / ⚠️ parcial / ❌ falta; el "¿por qué?" en una línea, sin jerga; si usás un término técnico, explicalo entre paréntesis)
+**Evaluación.** Una tabla:
+| Criterio | Estado | Observación |
+El estado es "cumple", "parcial" o "falta". La observación va en una línea, concreta, citando evidencia de la definición o señalando su ausencia.
 
-🔧 **Qué hacer ahora**: máximo 5 acciones priorizadas, cada una empezando con un verbo y diciendo dónde aplicarla.
+**Recomendaciones.** Hasta cinco, ordenadas por impacto. Cada una arranca con un verbo y dice qué cambiar y dónde.
 
-🚦 **Semáforo**: 🟢 listo / 🟡 mejorable / 🔴 riesgoso + una frase honesta de cierre.
+**Veredicto.** Verde, amarillo o rojo, con una frase de justificación.
 
-Reglas: citá evidencia de la definición cuando ayude, pero traducida a lenguaje simple. La ausencia también es evidencia ("tu definición no menciona X"). No inventes cumplimientos. Decí lo que falta sin suavizarlo, pero siempre acompañado del cómo arreglarlo. Regla de estilo: no uses el guión largo (em dash) en ningún texto; usá comas, dos puntos o paréntesis.`;
+Reglas: no inventes cumplimientos; la ausencia de evidencia es un hallazgo en sí mismo ("la definición no menciona X"). Señalá lo que falta sin suavizarlo, siempre acompañado de cómo corregirlo. No uses el guión largo (em dash): usá comas, dos puntos o paréntesis. Reservá los emojis para donde realmente aporten; esto es material de trabajo, no un folleto.`;
 
 function evalBrief(sectionNum, agentDefinition, extra = "", language = "es") {
   const s = SECTIONS[sectionNum];
   return [
-    `# 🔍 Revisión §${sectionNum}: ${s.title}`,
+    `# Revisión §${sectionNum}: ${s.title}`,
     ``,
     `Sos un revisor experto y amigable de agentes LLM: estricto con el criterio, claro y constructivo con la persona. Evaluá la definición provista contra los criterios de esta sección de "El Buen Agente". No inventes cumplimientos: si la definición no lo dice, no cumple.`,
     ``,
@@ -92,7 +92,7 @@ const NEXT_STEP = {
   evaluar_sistema: "Si el agente expone valor a terceros, seguí con `plan_exposicion_mcp` (§10).",
   plan_exposicion_mcp: "Fin del flujo de sistema. Si aún no corriste el gate final, corré `checklist_nacimiento`.",
   checklist_nacimiento:
-    "Si el veredicto es APTO: llamá `construir_agente` para generar la definición final lista para usar. Si es NO APTO: volvé a la tool de cada sección con ❌ (§1→`revisar_rol_y_frontera`, §2→`revisar_outputs`, §3→`evaluar_autonomia`, §4→`revisar_frontera_ejecucion`, §6→`auditar_contexto`, §7→`disenar_evaluacion`, §8→`generar_contrato`), aplicá las recomendaciones y volvé a correr este checklist.",
+    "Si el veredicto es APTO: llamá `construir_agente` para generar la definición final lista para usar. Si es NO APTO: volvé a la tool de cada sección con estado falta (§1→`revisar_rol_y_frontera`, §2→`revisar_outputs`, §3→`evaluar_autonomia`, §4→`revisar_frontera_ejecucion`, §6→`auditar_contexto`, §7→`disenar_evaluacion`, §8→`generar_contrato`), aplicá las recomendaciones y volvé a correr este checklist.",
   construir_agente:
     "Guardá el artefacto generado en el repo del agente y cerrá con `plan_de_inicio` (§12) para el plan de despliegue.",
   validar_veredicto:
@@ -101,7 +101,7 @@ const NEXT_STEP = {
 };
 
 const withNext = (toolName, output) =>
-  text(`${output}\n\n---\n➡️ **Siguiente paso recomendado:** ${NEXT_STEP[toolName]}`);
+  text(`${output}\n\n---\n**Siguiente paso:** ${NEXT_STEP[toolName]}`);
 
 const FLOW_INSTRUCTIONS = `Este servidor expone la guía "El Buen Agente" como tools que evalúan y mejoran definiciones de agentes LLM. Las tools forman un flujo y conviene ejecutarlas EN ORDEN:
 
@@ -137,7 +137,7 @@ const LANGUAGE = z
 // ---------------------------------------------------------------------------
 function buildServer() {
   const server = new McpServer(
-    { name: "el-buen-agente", version: "2.6.0" },
+    { name: "el-buen-agente", version: "2.7.0" },
     { instructions: FLOW_INSTRUCTIONS }
   );
 
@@ -159,7 +159,7 @@ function buildServer() {
       text(
         situacion === "nuevo"
           ? `# Flujo recomendado: agente NUEVO\n\n1. \`evaluar_necesidad\`: si NO hace falta un agente, frená acá (es el mejor resultado posible).\n2. \`revisar_rol_y_frontera\` (§1)\n3. \`revisar_outputs\` (§2)\n4. \`evaluar_autonomia\` (§3)\n5. \`revisar_frontera_ejecucion\` (§4)\n6. \`auditar_contexto\` (§6)\n7. \`disenar_evaluacion\` (§7)\n8. \`aplicar_challenger\`: segunda pasada adversarial sobre el diseño completo\n9. \`generar_contrato\` (§8)\n10. \`checklist_nacimiento\` (§11). GATE FINAL: si NO APTO, volvé a la sección fallida y repetí\n11. \`construir_agente\`: genera la definición final lista para usar\n12. \`plan_de_inicio\` (§12)\n\nTransversales: \`evaluar_sistema\` (§9) y \`plan_exposicion_mcp\` (§10) si el agente convive con otros o expone valor a terceros.\n\nDespués de cada tool: aplicá las recomendaciones a la definición ANTES de pasar a la siguiente: el flujo mejora iterativamente la misma definición.`
-          : `# Flujo recomendado: agente EXISTENTE\n\n1. \`checklist_nacimiento\` (§11): diagnóstico completo de 19 puntos.\n2. Por cada punto con ❌, corré la tool de su sección: §1→\`revisar_rol_y_frontera\`, §2→\`revisar_outputs\`, §3→\`evaluar_autonomia\`, §4→\`revisar_frontera_ejecucion\`, §5→\`aplicar_challenger\`, §6→\`auditar_contexto\`, §7→\`disenar_evaluacion\`, §8→\`generar_contrato\`.\n3. Aplicá las recomendaciones a la definición.\n4. Re-corré \`checklist_nacimiento\` para verificar el progreso (before/after medible).\n5. Con veredicto APTO: \`construir_agente\` para regenerar la definición final limpia, y \`plan_de_inicio\` (§12) si aún no está en producción.\n\nPriorizá los ❌ de mayor riesgo primero: autonomía (§3) y frontera de ejecución (§4) suelen ser los más peligrosos.`
+          : `# Flujo recomendado: agente EXISTENTE\n\n1. \`checklist_nacimiento\` (§11): diagnóstico completo de 19 puntos.\n2. Por cada punto con estado falta, corré la tool de su sección: §1→\`revisar_rol_y_frontera\`, §2→\`revisar_outputs\`, §3→\`evaluar_autonomia\`, §4→\`revisar_frontera_ejecucion\`, §5→\`aplicar_challenger\`, §6→\`auditar_contexto\`, §7→\`disenar_evaluacion\`, §8→\`generar_contrato\`.\n3. Aplicá las recomendaciones a la definición.\n4. Re-corré \`checklist_nacimiento\` para verificar el progreso (before/after medible).\n5. Con veredicto APTO: \`construir_agente\` para regenerar la definición final limpia, y \`plan_de_inicio\` (§12) si aún no está en producción.\n\nPriorizá las faltas de mayor riesgo primero: autonomía (§3) y frontera de ejecución (§4) suelen ser los más peligrosos.`
       )
   );
 
@@ -413,7 +413,7 @@ Proponé el mapeo concreto: lista de tools/resources/prompts a exponer con nombr
     },
     async ({ agent_definition, language }) => withNext("checklist_nacimiento", evalBrief("11", agent_definition,
       `## Instrucción adicional
-Evaluá los 19 puntos UNO POR UNO en una tabla: | # | Punto | Veredicto | Evidencia |. Al final: cantidad de ✅/⚠️/❌ y veredicto de merge (apto / no apto). Sé estricto: sin evidencia explícita en la definición, el punto no cumple.
+Evaluá los 19 puntos uno por uno en una tabla: | # | Punto | Estado | Evidencia |. El estado es "cumple", "parcial" o "falta". Al final, el conteo de cada estado y el veredicto de merge (apto / no apto). Sé estricto: sin evidencia explícita en la definición, el punto no cumple.
 
 ## Bloque máquina (para CI)
 Cerrá tu evaluación con un bloque de código JSON (cercado con \`\`\`json) con EXACTAMENTE esta forma:
@@ -490,7 +490,7 @@ Reglas del bloque: claves y valores de "estado" (ok|parcial|falta) y "veredicto"
         system_prompt: "un system prompt + bloque de configuración (tools, límites, schema) portable a cualquier framework",
       };
       return withNext("construir_agente", [
-        `# 🏗️ Construcción del agente`,
+        `# Construcción del agente`,
         ``,
         `Sos un arquitecto de agentes LLM. La definición de abajo ya pasó por las revisiones de "El Buen Agente". Tu tarea: convertirla en ${formatos[formato]}. NO evalúes: construí.`,
         ``,
@@ -608,7 +608,7 @@ app.get("/mcp", (_req, res) => res.status(405).set("Allow", "POST").send("Method
 app.delete("/mcp", (_req, res) => res.status(405).set("Allow", "POST").send("Method Not Allowed"));
 
 app.get("/health", (_req, res) =>
-  res.json({ name: "el-buen-agente-mcp", version: "2.6.0", status: "ok", endpoint: "/mcp" })
+  res.json({ name: "el-buen-agente-mcp", version: "2.7.0", status: "ok", endpoint: "/mcp" })
 );
 
 app.get("/", (_req, res) => {
@@ -628,8 +628,8 @@ app.get("/", (_req, res) => {
   a{color:#2a7ae2}
   .pill{display:inline-block;background:rgba(42,122,226,.12);border-radius:999px;padding:.1em .7em;font-size:.85em;margin-right:.4em}
 </style></head><body>
-<h1>🧭 El Buen Agente</h1>
-<p class="sub">Servidor MCP: la guía canónica para construir agentes LLM, convertida en 18 tools accionables. <span class="pill">v2.6.0</span><span class="pill">ES / EN</span></p>
+<h1>El Buen Agente</h1>
+<p class="sub">Servidor MCP: la guía canónica para construir agentes LLM, convertida en 18 tools accionables. <span class="pill">v2.7.0</span><span class="pill">ES / EN</span></p>
 <p>Le pasás la definición de tu agente y te devuelve: evaluación por dimensión (rol, outputs, autonomía, contexto…), contrato formal, un checklist de nacimiento de 19 puntos como gate de merge, y la definición final lista para usar.</p>
 <h2>Conectar</h2>
 <p><strong>Claude Code:</strong></p>
@@ -641,9 +641,9 @@ app.get("/", (_req, res) => {
 <p>El servidor recomienda el orden solo: cada respuesta incluye el siguiente paso, y la tool <code>recomendar_flujo</code> devuelve el plan completo. Todas las tools aceptan <code>language: "en"</code>.</p>
 <h2>Links</h2>
 <table>
-<tr><td>📦 Código y docs</td><td><a href="https://github.com/apasztetnik/el-buen-agente-mcp">github.com/apasztetnik/el-buen-agente-mcp</a></td></tr>
-<tr><td>🗂 Registry MCP</td><td><code>io.github.apasztetnik/el-buen-agente-mcp</code></td></tr>
-<tr><td>❤️ Estado</td><td><a href="/health">/health</a></td></tr>
+<tr><td>Código y docs</td><td><a href="https://github.com/apasztetnik/el-buen-agente-mcp">github.com/apasztetnik/el-buen-agente-mcp</a></td></tr>
+<tr><td>Registry MCP</td><td><code>io.github.apasztetnik/el-buen-agente-mcp</code></td></tr>
+<tr><td>Estado</td><td><a href="/health">/health</a></td></tr>
 </table>
 <p style="opacity:.6;font-size:.85em;margin-top:2.5rem">Hecho con la guía "El Buen Agente", que también se aplica a sí misma: golden set, tests como gate de deploy, y rate limiting (60 req/min). Solo se loggea el nombre de la tool llamada, nunca el contenido.</p>
 </body></html>`);

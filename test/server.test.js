@@ -82,7 +82,7 @@ test("evaluar_necesidad: embebe el problema + criterios §0 + hint", async () =>
   assert.ok(t.includes("PROBLEMA_MARCADOR_XYZ"), "debe embeber el input");
   assert.ok(t.includes("¿de verdad hace falta un agente?"), "criterios de §0");
   assert.ok(t.includes("Antipatrones"), "tabla de antipatrones de §0");
-  assert.ok(t.includes("Siguiente paso recomendado"), "hint de flujo");
+  assert.ok(t.includes("Siguiente paso:"), "hint de flujo");
   assert.ok(t.includes("revisar_rol_y_frontera"), "siguiente tool correcta");
 });
 
