@@ -1,5 +1,7 @@
 # El Buen Agente — MCP Server
 
+[![MCP Registry](https://img.shields.io/badge/MCP_Registry-io.github.apasztetnik%2Fel--buen--agente--mcp-blue)](https://registry.modelcontextprotocol.io/v0/servers?search=el-buen-agente) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 Servidor MCP público que convierte la guía **"El Buen Agente"** (criterios canónicos para construir agentes LLM robustos) en **17 tools accionables**: en vez de leer una guía, le pasás la definición de tu agente y te devuelve evaluaciones estructuradas, un contrato formal, un checklist de 19 puntos como gate de merge, y la definición final lista para usar.
 
 **Endpoint público:** `https://el-buen-agente-mcp-production.up.railway.app/mcp`
