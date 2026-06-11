@@ -20,11 +20,11 @@ Casos y veredictos esperados:
 
 | Fixture | Tool | Veredicto esperado |
 |---|---|---|
-| `facturabot-v1.md` | `checklist_nacimiento` | NO APTO (≤2 ⚠️, ≥15 ❌) |
-| `facturabot-v1.md` | `evaluar_autonomia` | 🔴 rojo |
-| `facturabot-v1.md` | `evaluar_necesidad` | 🟡 + nivel mínimo "workflow + agente para excepciones" |
-| `facturabot-v2.md` | `checklist_nacimiento` | APTO (≥16 ✅, 0 ❌) |
-| `facturabot-v2.md` | `evaluar_autonomia` | 🟢 verde |
+| `facturabot-v1.md` | `checklist_nacimiento` | NO APTO (faltas >= 15, parciales <= 2) |
+| `facturabot-v1.md` | `evaluar_autonomia` | rojo |
+| `facturabot-v1.md` | `evaluar_necesidad` | amarillo + nivel mínimo "workflow + agente para excepciones" |
+| `facturabot-v2.md` | `checklist_nacimiento` | APTO (cumple >= 16, faltas 0) |
+| `facturabot-v2.md` | `evaluar_autonomia` | verde |
 
 Si un cambio en `el_buen_agente.md` o en los briefs hace que estos veredictos cambien, es una regresión (o un cambio de criterio deliberado que hay que documentar acá).
 

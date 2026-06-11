@@ -74,7 +74,7 @@ Also exposes the guide as a **resource** (`guide://el-buen-agente`, or per secti
 
 ## How it works
 
-Each tool packages its section's criteria + your agent's definition + a strict output format (scorecard with evidence, max 5 prioritized recommendations, traffic light). The consuming agent runs the evaluation within that frame: the criteria travel with the tool, regardless of which LLM consumes it.
+Each tool packages its section's criteria + your agent's definition + a strict output format (an assessment with meets/partial/missing states and cited evidence, up to 5 prioritized recommendations, a green/amber/red verdict, and the questions only the author can answer). The consuming agent runs the evaluation within that frame: the criteria travel with the tool, regardless of which LLM consumes it.
 
 ## Use it as a CI gate
 
@@ -96,7 +96,7 @@ claude -p "Connect to el-buen-agente and run checklist_nacimiento on agents/my-a
 ```bash
 npm install
 npm start                         # http://localhost:3000/mcp
-npm test                          # deterministic suite (16 tests), gates every deploy
+npm test                          # deterministic suite (18 tests), gates every deploy
 npm run eval:golden -- --dry-run  # golden set mechanics, free
 npm run eval:golden               # LLM eval vs expected verdicts (needs ANTHROPIC_API_KEY)
 ```

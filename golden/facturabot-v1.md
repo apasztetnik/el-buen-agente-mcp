@@ -1,8 +1,8 @@
 # Golden fixture: FacturaBot v1 (diseño ingenuo)
 
 **Veredicto esperado en `checklist_nacimiento`: NO APTO (≤2 parciales, ≥15 faltas).**
-**Veredicto esperado en `evaluar_autonomia`: 🔴 rojo** (autonomía total día 1 + API bancaria + mails externos sin sanitizar).
-**Veredicto esperado en `evaluar_necesidad`: 🟡** (problema real, diseño sobre-dimensionado; nivel mínimo: workflow + agente solo para excepciones; antipatrones "agente genérico" y "autonomía día 1" presentes).
+**Veredicto esperado en `evaluar_autonomia`: rojo** (autonomía total día 1 + API bancaria + mails externos sin sanitizar).
+**Veredicto esperado en `evaluar_necesidad`: amarillo** (problema real, diseño sobre-dimensionado; nivel mínimo: workflow + agente solo para excepciones; antipatrones "agente genérico" y "autonomía día 1" presentes).
 
 ---
 

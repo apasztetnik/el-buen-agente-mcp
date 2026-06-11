@@ -115,7 +115,7 @@ const FLOW_INSTRUCTIONS = `Este servidor expone la guía "El Buen Agente" como t
 10. \`construir_agente\`: genera la definición final del agente, lista para usar
 11. \`plan_de_inicio\`: plan de despliegue
 
-**Agente EXISTENTE (mejora):** empezá por \`checklist_nacimiento\` como diagnóstico, después profundizá solo en las secciones con ❌ usando la tool correspondiente, y cerrá re-corriendo \`checklist_nacimiento\`.
+**Agente EXISTENTE (mejora):** empezá por \`checklist_nacimiento\` como diagnóstico, después profundizá solo en las secciones con estado falta usando la tool correspondiente, y cerrá re-corriendo \`checklist_nacimiento\`.
 
 **Transversales:** \`aplicar_challenger\` / \`challenger_decision\` después de cualquier rediseño; \`evaluar_sistema\` y \`plan_exposicion_mcp\` cuando el agente convive con otros o expone valor a terceros.
 
@@ -139,7 +139,7 @@ const LANGUAGE = z
 // ---------------------------------------------------------------------------
 function buildServer() {
   const server = new McpServer(
-    { name: "el-buen-agente", version: "2.8.0" },
+    { name: "el-buen-agente", version: "2.8.1" },
     { instructions: FLOW_INSTRUCTIONS }
   );
 
@@ -610,7 +610,7 @@ app.get("/mcp", (_req, res) => res.status(405).set("Allow", "POST").send("Method
 app.delete("/mcp", (_req, res) => res.status(405).set("Allow", "POST").send("Method Not Allowed"));
 
 app.get("/health", (_req, res) =>
-  res.json({ name: "el-buen-agente-mcp", version: "2.8.0", status: "ok", endpoint: "/mcp" })
+  res.json({ name: "el-buen-agente-mcp", version: "2.8.1", status: "ok", endpoint: "/mcp" })
 );
 
 app.get("/", (_req, res) => {
@@ -631,7 +631,7 @@ app.get("/", (_req, res) => {
   .pill{display:inline-block;background:rgba(42,122,226,.12);border-radius:999px;padding:.1em .7em;font-size:.85em;margin-right:.4em}
 </style></head><body>
 <h1>El Buen Agente</h1>
-<p class="sub">Servidor MCP: la guía canónica para construir agentes LLM, convertida en 18 tools accionables. <span class="pill">v2.8.0</span><span class="pill">ES / EN</span></p>
+<p class="sub">Servidor MCP: la guía canónica para construir agentes LLM, convertida en 18 tools accionables. <span class="pill">v2.8.1</span><span class="pill">ES / EN</span></p>
 <p>Le pasás la definición de tu agente y te devuelve: evaluación por dimensión (rol, outputs, autonomía, contexto…), contrato formal, un checklist de nacimiento de 19 puntos como gate de merge, y la definición final lista para usar.</p>
 <h2>Conectar</h2>
 <p><strong>Claude Code:</strong></p>

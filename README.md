@@ -42,7 +42,7 @@ evaluar_necesidad → revisar_rol_y_frontera → revisar_outputs → evaluar_aut
 → generar_contrato → checklist_nacimiento (GATE) → construir_agente → plan_de_inicio
 
 Agente EXISTENTE:
-checklist_nacimiento (diagnóstico) → tools de las secciones con ❌ → re-correr checklist
+checklist_nacimiento (diagnóstico) → tools de las secciones con faltas → re-correr checklist
 ```
 
 ## Tools
@@ -76,7 +76,7 @@ También expone la guía como **resource** (`guide://el-buen-agente` completa, o
 
 ## Cómo funciona
 
-Cada tool empaqueta los criterios de su sección + la definición del agente + un formato de salida estricto (scorecard ✅/⚠️/❌, evidencia citada, máx. 5 recomendaciones, semáforo). El agente que consume la tool ejecuta la evaluación con ese marco: el criterio viaja con la tool, sin importar qué LLM la use.
+Cada tool empaqueta los criterios de su sección + la definición del agente + un formato de salida estricto (una evaluación con estados cumple/parcial/falta y evidencia citada, hasta 5 recomendaciones priorizadas, un veredicto verde/amarillo/rojo, y las preguntas que solo el autor puede responder). El agente que consume la tool ejecuta la evaluación con ese marco: el criterio viaja con la tool, sin importar qué LLM la use.
 
 ## Usarlo como gate en CI
 

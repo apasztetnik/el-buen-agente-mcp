@@ -6,6 +6,11 @@ Las versiones se publican al pushear un tag `vX.Y.Z`: el CI corre los tests, Rai
 
 ## [Sin publicar]
 
+## [2.8.1] - 2026-06-11
+
+### Cambiado
+- Documentación al día con el tono actual: README (ES/EN), golden/README.md y los fixtures golden ya no describen las respuestas con el sistema viejo de íconos (scorecard ✅/⚠️/❌, semáforo 🔴🟡🟢); ahora usan los estados en palabras (cumple/parcial/falta) y el veredicto (verde/amarillo/rojo), igual que la salida real desde v2.7. Las instrucciones de flujo del servidor también dejan de referirse a "secciones con ❌".
+
 ## [2.8.0] - 2026-06-11
 
 ### Agregado
@@ -65,7 +70,8 @@ Las versiones se publican al pushear un tag `vX.Y.Z`: el CI corre los tests, Rai
 - Repositorio público en GitHub con deploy automático a Railway por push a `main`.
 - Rate limiting (60 req/min por IP, 600 global) y cap de recursos del servicio.
 
-[Sin publicar]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.8.0...HEAD
+[Sin publicar]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.8.1...HEAD
+[2.8.1]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.8.0...v2.8.1
 [2.8.0]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.7.1...v2.8.0
 [2.7.1]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.7.0...v2.7.1
 [2.7.0]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.6.0...v2.7.0

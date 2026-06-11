@@ -1,7 +1,7 @@
 # Golden fixture: FacturaBot v2 (diseño robusto)
 
 **Veredicto esperado en `checklist_nacimiento`: APTO (≥16 cumplidos, 0 faltas; se admite 1-3 parciales).**
-**Veredicto esperado en `evaluar_autonomia`: 🟢 verde** (progresión shadow → supervisado → autónomo por evidencia, límites duros, frenos, override).
+**Veredicto esperado en `evaluar_autonomia`: verde** (progresión shadow → supervisado → autónomo por evidencia, límites duros, frenos, override).
 
 ---
 
