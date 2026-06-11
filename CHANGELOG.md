@@ -6,6 +6,17 @@ Las versiones se publican al pushear un tag `vX.Y.Z`: el CI corre los tests, Rai
 
 ## [Sin publicar]
 
+## [2.7.1] - 2026-06-10
+
+### Cambiado
+- §1 de la guía: define "identity layer" en su primera aparición y aclara que el rol es el contenido y el identity layer es el lugar inmutable donde vive, para que las evaluaciones no presenten ambos términos como jerga separada (feedback de usuario).
+- README (ES y EN): sección de descripción detallada que explica el modelo (el servidor no llama a ningún modelo ni guarda datos; el cómputo corre del lado del cliente) y los dos escenarios de uso.
+
+## [2.7.0] - 2026-06-10
+
+### Cambiado
+- Tono profesional en los resultados de las tools: estructura Resumen / Evaluación / Recomendaciones / Veredicto, estados como "cumple / parcial / falta" en vez de semáforos de colores, y se quitaron los emojis decorativos de encabezados y landing.
+
 ## [2.6.0] - 2026-06-10
 
 ### Agregado
@@ -49,7 +60,9 @@ Las versiones se publican al pushear un tag `vX.Y.Z`: el CI corre los tests, Rai
 - Repositorio público en GitHub con deploy automático a Railway por push a `main`.
 - Rate limiting (60 req/min por IP, 600 global) y cap de recursos del servicio.
 
-[Sin publicar]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.6.0...HEAD
+[Sin publicar]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.7.1...HEAD
+[2.7.1]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.7.0...v2.7.1
+[2.7.0]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.6.0...v2.7.0
 [2.6.0]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.3.0...v2.4.0

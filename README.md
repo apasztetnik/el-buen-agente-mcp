@@ -6,6 +6,19 @@
 
 Servidor MCP público que convierte la guía **"El Buen Agente"** (criterios canónicos para construir agentes LLM robustos) en **18 tools accionables**: en vez de leer una guía, le pasás la definición de tu agente y te devuelve evaluaciones estructuradas, un contrato formal, un checklist de 19 puntos como gate de merge, y la definición final lista para usar.
 
+## Descripción detallada
+
+La mayoría del valor de un agente no está en el modelo (es un commodity) sino en el criterio con el que se diseña: qué rol tiene, qué NO debe hacer, cuánta autonomía se le da, con qué contexto razona y cómo se mide si funciona. Ese criterio suele vivir en guías y documentos que nadie relee a la hora de construir. Este servidor toma esa guía y la vuelve consultable en el momento exacto del trabajo, como herramientas que un agente puede invocar.
+
+El mecanismo es deliberadamente simple y tiene una consecuencia importante: **el servidor no llama a ningún modelo ni guarda datos**. Cada tool arma un "brief" (los criterios de su sección de la guía, más la definición del agente que le pasaste, más un formato de salida estricto) y lo devuelve. Quien ejecuta la evaluación es el LLM del cliente que consume el MCP (tu Claude Code, tu Cursor), con las credenciales de cada usuario. Es decir: el criterio viaja dentro del texto de la tool y el cómputo corre de tu lado. Nadie comparte ni paga la API de nadie, y las definiciones que evaluás nunca salen de tu entorno (el servidor solo registra el nombre de la tool llamada, jamás el contenido).
+
+Sirve para dos escenarios:
+
+- **Diseñar un agente nuevo:** el flujo arranca preguntando si de verdad hace falta un agente (muchas veces alcanza con un prompt o un workflow), y si hace falta, te guía sección por sección hasta el checklist final y la definición lista para usar.
+- **Auditar un agente existente:** empezás por el checklist como diagnóstico y profundizás solo en las dimensiones que fallan, con un veredicto medible que sirve incluso como gate de CI.
+
+Las evaluaciones no son un sello de aprobación: la herramienta es estricta a propósito (la ausencia de evidencia cuenta como hallazgo), porque su utilidad está en encontrar los huecos antes de producción, no en confirmar que todo está bien. Todas las tools responden también en inglés con `language: "en"`, y el criterio de fondo se edita en un único archivo Markdown versionado, así que mejorar la guía es editar un archivo y abrir un PR.
+
 **Endpoint público:** `https://el-buen-agente-mcp-production.up.railway.app/mcp`
 
 ## Conectar

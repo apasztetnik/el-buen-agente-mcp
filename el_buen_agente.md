@@ -50,9 +50,13 @@ ni herramientas que mejoren la respuesta, el agente no aporta nada.
 Todo agente define **qué problema resuelve y qué NO es su responsabilidad**.
 Sin frontera, intenta hacer demasiado y lo hace mal. Especialista, no
 generalista: un dominio acotado da contexto más preciso, evaluación más clara
-y composición. La frontera se escribe en el **identity layer** (read-only,
-inyectado en cada decisión) y, donde se pueda, se **enforcea en código** (no
-solo en el prompt).
+y composición.
+
+El rol y la frontera viven en el **identity layer**: la capa read-only que
+contiene la identidad del agente (rol, límites y formato de salida) y se
+inyecta en cada decisión. No son conceptos separados: el rol es el contenido,
+el identity layer es el lugar inmutable donde ese contenido se escribe. Donde
+se pueda, la frontera además se **enforcea en código**, no solo en el prompt.
 
 ---
 

@@ -137,7 +137,7 @@ const LANGUAGE = z
 // ---------------------------------------------------------------------------
 function buildServer() {
   const server = new McpServer(
-    { name: "el-buen-agente", version: "2.7.0" },
+    { name: "el-buen-agente", version: "2.7.1" },
     { instructions: FLOW_INSTRUCTIONS }
   );
 
@@ -608,7 +608,7 @@ app.get("/mcp", (_req, res) => res.status(405).set("Allow", "POST").send("Method
 app.delete("/mcp", (_req, res) => res.status(405).set("Allow", "POST").send("Method Not Allowed"));
 
 app.get("/health", (_req, res) =>
-  res.json({ name: "el-buen-agente-mcp", version: "2.7.0", status: "ok", endpoint: "/mcp" })
+  res.json({ name: "el-buen-agente-mcp", version: "2.7.1", status: "ok", endpoint: "/mcp" })
 );
 
 app.get("/", (_req, res) => {
@@ -629,7 +629,7 @@ app.get("/", (_req, res) => {
   .pill{display:inline-block;background:rgba(42,122,226,.12);border-radius:999px;padding:.1em .7em;font-size:.85em;margin-right:.4em}
 </style></head><body>
 <h1>El Buen Agente</h1>
-<p class="sub">Servidor MCP: la guía canónica para construir agentes LLM, convertida en 18 tools accionables. <span class="pill">v2.7.0</span><span class="pill">ES / EN</span></p>
+<p class="sub">Servidor MCP: la guía canónica para construir agentes LLM, convertida en 18 tools accionables. <span class="pill">v2.7.1</span><span class="pill">ES / EN</span></p>
 <p>Le pasás la definición de tu agente y te devuelve: evaluación por dimensión (rol, outputs, autonomía, contexto…), contrato formal, un checklist de nacimiento de 19 puntos como gate de merge, y la definición final lista para usar.</p>
 <h2>Conectar</h2>
 <p><strong>Claude Code:</strong></p>
