@@ -6,6 +6,11 @@ Las versiones se publican al pushear un tag `vX.Y.Z`: el CI corre los tests, Rai
 
 ## [Sin publicar]
 
+## [2.8.0] - 2026-06-11
+
+### Agregado
+- Sección "Lo que necesito de vos" en el formato de salida: convierte los huecos que solo el autor puede resolver en hasta tres preguntas concretas, cada una atada a su hallazgo, en vez de que el agente consumidor improvise preguntas genéricas y desconectadas al final. No pregunta si con la información disponible alcanza (no es una encuesta). Resuelve el salto raro entre las recomendaciones y unas pocas preguntas sueltas (feedback de uso).
+
 ## [2.7.1] - 2026-06-10
 
 ### Cambiado
@@ -60,7 +65,8 @@ Las versiones se publican al pushear un tag `vX.Y.Z`: el CI corre los tests, Rai
 - Repositorio público en GitHub con deploy automático a Railway por push a `main`.
 - Rate limiting (60 req/min por IP, 600 global) y cap de recursos del servicio.
 
-[Sin publicar]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.7.1...HEAD
+[Sin publicar]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.8.0...HEAD
+[2.8.0]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.7.1...v2.8.0
 [2.7.1]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.7.0...v2.7.1
 [2.7.0]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.6.0...v2.7.0
 [2.6.0]: https://github.com/apasztetnik/el-buen-agente-mcp/compare/v2.5.0...v2.6.0
